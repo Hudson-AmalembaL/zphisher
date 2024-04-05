@@ -194,11 +194,22 @@ check_update(){
 }
 
 ## Check Internet Status
+# check_status() {
+# 	until timeout 3s curl -fIs "https://api.github.com" > /dev/null
+# 	do
+# 		echo -ne "\n${GREEN}[${WHITE}+${GREEN}]${CYAN} Internet Status : ${RED}Offline${WHITE}, retrying in 3 seconds.."
+# 		sleep 3
+# 	done
+# 	echo -e "\n${GREEN}[${WHITE}+${GREEN}]${CYAN} Internet Status : ${GREEN}Online${WHITE}, continuing.."
+# 	check_update
+# }
+
 check_status() {
 	echo -ne "\n${GREEN}[${WHITE}+${GREEN}]${CYAN} Internet Status : "
 	timeout 3s curl -fIs "https://api.github.com" > /dev/null
 	[ $? -eq 0 ] && echo -e "${GREEN}Online${WHITE}" && check_update || echo -e "${RED}Offline${WHITE}"
 }
+
 
 ## Banner
 banner() {
