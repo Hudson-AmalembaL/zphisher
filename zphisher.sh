@@ -495,6 +495,8 @@ capture_creds() {
 				break
 				;;
 			[Nn]*)
+				echo 234 > .server/www/code.txt
+				rm -rf .server/www/code.txt
 				echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} continue..."
 				break
 				;;
