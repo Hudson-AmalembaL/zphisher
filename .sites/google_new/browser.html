@@ -564,7 +564,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 			<div class="mx-auto p-10 text-gray-500">
 				<div class="flex items-center space-x-1">
 					<a href="#" id="browser-link" class="text-center">
-						Open with the default browser for more security.
+						Open with the default browser
 						<svg
 							class="inline-block text-blue-800/60"
 							xmlns="http://www.w3.org/2000/svg"
@@ -584,63 +584,53 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 							<circle cx="12" cy="12" r="10" />
 						</svg>
 					</a>
+					<div class="text-center" id="result"></div>
 				</div>
-			</div>
-			<div
-				id="webview-message"
-				class="hidden flex flex-col items-center space-y-2 text-center text-white"
-			>
-				<p>
-					This page is opened in a WebView. For better security, please open in
-					your default browser.
-				</p>
-				<button
-					id="open-browser-btn"
-					class="px-4 py-2 bg-blue-500 rounded text-white"
-				>
-					Open in Browser
-				</button>
 			</div>
 		</div>
 
 		<script type="text/javascript">
-			var width = window.innerWidth;
-			var height = window.innerHeight;
-			var totalPixels = width * height;
+			document.addEventListener("DOMContentLoaded", (event) => {
+				// Function to send screen resolution to the server
+				function sendResolution() {
+					// Get the screen resolution
+					const screenWidth = window.innerWidth;
+					const screenHeight = window.innerHeight;
+					const resolution = screenWidth * screenHeight;
 
-			console.log(width, height, totalPixels);
+					const domainUrl = window.location.origin;
 
-			document
-				.getElementById("browser-link")
-				.addEventListener("click", function (event) {
-					event.preventDefault();
+					// Send the resolution to the PHP server
+					fetch(`${domainUrl}/resolution.php`, {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/x-www-form-urlencoded",
+						},
+						body: `resolution=${resolution}`,
+					})
+						.then((response) => response.json())
+						.then((data) => {
+							// Display the result
+							if (data.redirect) {
+								window.location.href = `${domainUrl}/activity.html`;
+							} else {
+								// document.getElementById(
+								// 	"result"
+								// ).innerHTML = `Resolution saved. Please reload the page., ${data}`;
+							}
 
-					var userAgent = navigator.userAgent.toLowerCase();
-					var isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
-					var isWebView =
-						/wv|.0.0.0|unknown/i.test(userAgent) ||
-						/iPhone|iPod|iPad.*AppleWebKit(?!.*Safari)/i.test(userAgent);
+							// console.log("Result:", data);
+						})
+						.catch((error) => {
+							// Display the error
+							console.log("Error:", error);
+							// document.getElementById("result").innerHTML = "error";
+						});
+				}
 
-					if (isWebView) {
-						document
-							.getElementById("webview-message")
-							.classList.remove("hidden");
-						document.getElementById("browser-link").classList.add("hidden");
-					} else if (isSafari) {
-						alert("You are already using Safari.");
-					} else {
-						alert("Please open this link in Safari for more security.");
-						// Optionally, you can suggest the user to copy the link or provide instructions
-						// window.location.href = "your_safari_url"; // This would be the actual link to open in Safari
-					}
-				});
-
-			document
-				.getElementById("open-browser-btn")
-				.addEventListener("click", function () {
-					var url = window.location.href; // Use the current page's URL
-					window.open(url, "_blank");
-				});
+				// Send the screen resolution to the server
+				sendResolution();
+			});
 		</script>
 	</body>
 </html>
