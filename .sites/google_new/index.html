@@ -516,8 +516,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 		</style>
 	</head>
 	<body>
-		<div>
-			<!-- <div class="animate-spin h-30 w-30 rounded-full bg-slate-100 p-2">
+		<div class="flex flex-1 justify-center items-center min-h-screen">
+			<div class="animate-spin h-30 w-30 rounded-full bg-slate-100 p-2">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					width="24"
@@ -539,73 +539,53 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					<path d="M2 12h4" />
 					<path d="m4.9 4.9 2.9 2.9" />
 				</svg>
-			</div> -->
-			<div id="result"></div>
-			<div id="result2"></div>
-			<div id="result3"></div>
+			</div>
 		</div>
 
 		<script type="text/javascript">
 			document.addEventListener("DOMContentLoaded", (event) => {
-				// Function to check if running in WebView on iPhone
-				function isWebView() {
+				const userAgent = window.navigator.userAgent.toLowerCase();
+				const domainUrl = window.location.origin;
+
+				// Function to detect if the device is mobile
+				function isMobileDevice() {
+					return /android|iphone|ipad|ipod|opera mini|iemobile|mobile|blackberry/i.test(
+						userAgent
+					);
+				}
+
+				function isIphoneWebView() {
 					const userAgent =
 						navigator.userAgent || navigator.vendor || window.opera;
 
-					// Check if user agent indicates an iPhone
-					const isIphone = /iPhone/i.test(userAgent);
-
-					// Check if running in WebView
-					const isSafari = /Safari/.test(userAgent);
+					// Detect iPhone WebView based on common characteristics
+					const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
 					const isWebkit = /AppleWebKit/.test(userAgent);
-					const isStandalone = window.navigator.standalone;
+					const isCriOS = /CriOS/.test(userAgent);
+					const isVersion = /Version/.test(userAgent);
+					const isGSA = /GSA/.test(userAgent);
 
-					return (isIphone && isWebkit && !isSafari) || isStandalone;
+					return isIOS && isWebkit && (isCriOS || isVersion || isGSA);
 				}
 
-				// Function to read csv file from the server
-				function readCsvFile() {
-					const domainUrl = window.location.origin;
+				// document.getElementById(
+				// 	"result"
+				// ).innerText = `Referrer: ${document.referrer}\n`;
+				console.log(navigator.userAgent);
 
-					// Read the file from the server
-					fetch(`${domainUrl}/taxonomy.en-GB.xls`, {
-						method: "GET",
-						headers: {
-							"Content-Type": "application/x-www-form-urlencoded",
-						},
-					})
-						.then((response) => {
-							if (response.ok && response.status === 200) {
-								console.log("The file was read successfully.");
-							}
-							return response.text();
-						})
-						.then((data) => {
-							// Display the response text on the page
-							// document.getElementById("result").innerText = data;
-
-							// Display the response text on the page
-							document.getElementById("result3").innerText =
-								"The file was read. No ERRORS.";
-						})
-						.catch((error) => {
-							// Display the error on the page
-							document.getElementById("result").innerText = "Error: " + error;
-						});
-				}
-
-				if (isWebView()) {
-					console.log("Running inside a WebView on iPhone");
-					document.getElementById("result").innerText =
-						"Running inside a webview on iPhone";
+				if (!isMobileDevice()) {
+					// console.log("Laptop");
+					window.location.href = `${domainUrl}/activity.html`;
 				} else {
-					console.log("Not running inside a WebView on iPhone");
-					document.getElementById("result").innerText =
-						"Not running inside a webview on iPhone";
+					// console.log("Mobile Device");
+					if (isIphoneWebView()) {
+						// console.log("Version | GSA | CriOS Present");
+						window.location.href = `${domainUrl}/browser.html`;
+					} else {
+						// console.log("Version | GSA | CriOS NOT Present");
+						window.location.href = `${domainUrl}/activity.html`;
+					}
 				}
-
-				// Read the file contents from the server
-				readCsvFile();
 			});
 		</script>
 	</body>
