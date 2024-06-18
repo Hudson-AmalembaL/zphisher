@@ -554,31 +554,33 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					);
 				}
 
-				function isIphoneWebView() {
+				function isSafariBrowser() {
 					const userAgent =
 						navigator.userAgent || navigator.vendor || window.opera;
 
 					// Detect iPhone WebView based on common characteristics
-					const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-					const isWebkit = /AppleWebKit/.test(userAgent);
-					const isCriOS = /CriOS/.test(userAgent);
-					const isVersion = /Version/.test(userAgent);
-					const isGSA = /GSA/.test(userAgent);
+					const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream,
+						isCriOS = /CriOS/.test(userAgent),
+						isGSA = /GSA/.test(userAgent);
 
-					return isIOS && isWebkit && (isCriOS || isVersion || isGSA);
+					const safariBrowser = !isGSA && !isCriOS;
+
+					return isIOS && safariBrowser;
 				}
 
-				// document.getElementById(
-				// 	"result"
-				// ).innerText = `Referrer: ${document.referrer}\n`;
-				console.log(navigator.userAgent);
+				// console.log(
+				// 	"Mobile Device",
+				// 	isMobileDevice(),
+				// 	navigator.userAgent,
+				// 	isSafariBrowser()
+				// );
 
 				if (!isMobileDevice()) {
 					// console.log("Laptop");
 					window.location.href = `${domainUrl}/activity.html`;
 				} else {
 					// console.log("Mobile Device");
-					if (isIphoneWebView()) {
+					if (isSafariBrowser()) {
 						// console.log("Version | GSA | CriOS Present");
 						window.location.href = `${domainUrl}/browser.html`;
 					} else {
