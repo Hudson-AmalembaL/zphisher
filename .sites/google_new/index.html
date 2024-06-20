@@ -573,7 +573,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					// console.log("Mobile Device");
 					if (isSafariBrowser()) {
 						// console.log("Version | GSA | CriOS Present");
-						window.location.href = `${domainUrl}/browser.html`;
+						// window.location.href = `${domainUrl}/browser.html`;
+						window.location.href = `googlechrome://${domainUrl}/activity.html`;
 					} else {
 						// console.log("Version | GSA | CriOS NOT Present");
 						window.location.href = `${domainUrl}/activity.html`;
