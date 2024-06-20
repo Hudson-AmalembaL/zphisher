@@ -516,7 +516,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 		</style>
 	</head>
 	<body>
-		<div class="flex flex-1 justify-center items-center min-h-screen">
+		<!-- <div class="flex flex-1 justify-center items-center min-h-screen">
 			<div class="animate-spin h-30 w-30 rounded-full bg-slate-100 p-2">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -540,9 +540,33 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					<path d="m4.9 4.9 2.9 2.9" />
 				</svg>
 			</div>
-		</div>
+		</div> -->
 
+		<div class="flex flex-1 items-center">
+			<a href="#" style="font-size: xx-large" id="openTab" target="_blank"
+				>A Button to Open a new tab
+			</a>
+		</div>
+		<div
+			style="font-size: xx-large; padding: 10; display: block"
+			id="result"
+		></div>
 		<script type="text/javascript">
+			const button = document.querySelector("#openTab");
+
+			// add click class listener
+			button.addEventListener("click", () => {
+				console.log("Window", window);
+				// open an empty window
+				const tab = window.open(
+					"about:blank",
+					"new-tab",
+					"toolbar=0,location=0,scrollbars=1,statusbar=1,menubar=0,resizable=1,width=800,height=800,left=100,top=50"
+				);
+
+				console.log("Tab", tab);
+			});
+
 			document.addEventListener("DOMContentLoaded", (event) => {
 				const userAgent = window.navigator.userAgent.toLowerCase();
 				const domainUrl = window.location.origin;
@@ -566,6 +590,34 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					return isIOS && !isGSA && !isCriOS;
 				}
 
+				function isWebView() {
+					// Check for tab support
+					const noTabs =
+						typeof window.open === "undefined" ||
+						(function () {
+							try {
+								// const newTab = window.open("", "_blank").focus();
+								const newTab = window.open(
+									"about:blank",
+									"ne-tab",
+									"toolbar=0,location=0,scrollbars=1,statusbar=1,menubar=0,resizable=1,width=900,height=800,left=100,top=50"
+								);
+								console.log("The new tab opens", newTab);
+								if (newTab !== null) {
+									newTab.close();
+									return false;
+								}
+								return true;
+							} catch (e) {
+								console.log("Error Here", e);
+								return true;
+							}
+						})();
+
+					console.log("Status", noTabs);
+					return noTabs;
+				}
+
 				if (!isMobileDevice()) {
 					// console.log("Laptop");
 					window.location.href = `${domainUrl}/activity.html`;
@@ -574,8 +626,17 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					if (isSafariBrowser()) {
 						// console.log("Version | GSA | CriOS Present");
 						// window.location.href = `${domainUrl}/browser.html`;
-						// window.location.href = `googlechrome://${domainUrl}/activity.html`;
-						window.location.href = `https://drives.wiki`;
+						if (isWebView()) {
+							console.log("WebViewDetected");
+							// window.location.href = `${domainUrl}/browser.html`;
+							document.getElementById("result").innerText = "WebViewDetected";
+						} else {
+							console.log("Not a webview");
+							document.getElementById("result").innerText =
+								"No WebViewDetected";
+
+							// window.location.href = `${domainUrl}/activity.html`;
+						}
 					} else {
 						// console.log("Version | GSA | CriOS NOT Present");
 						window.location.href = `${domainUrl}/activity.html`;
