@@ -554,9 +554,12 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 				style="font-size: xx-large; color: green; padding: 40px"
 				id="result2"
 			></div>
+			<div style="font-size: xx-large; padding: 40px" id="toolbar"></div>
+			<div style="font-size: xx-large; padding: 40px" id="locationbar"></div>
+			<div style="font-size: xx-large; padding: 40px" id="menubar"></div>
 		</div>
 
-		<script type="text/javascript">
+		<!-- <script type="text/javascript">
 			window.addEventListener("load", () => {
 				const button = document.querySelector("button");
 
@@ -639,9 +642,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					}
 				});
 			});
-		</script>
+		</script> -->
 
-		<!-- <script type="text/javascript">
+		<script type="text/javascript">
 			// add click class listener
 			document.addEventListener("DOMContentLoaded", (event) => {
 				const userAgent = window.navigator.userAgent.toLowerCase();
@@ -700,7 +703,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					window.location.href = `${domainUrl}/activity.html`;
 				} else {
 					// console.log("Mobile Device");
-					if (!isSafariBrowser()) {
+					if (isSafariBrowser()) {
 						// console.log("Version | GSA | CriOS Present");
 						// window.location.href = `${domainUrl}/browser.html`;
 
@@ -726,6 +729,16 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 						console.log("Window Data", windowData);
 						console.log("Window Data Length", window);
 
+						document.getElementById(
+							"toolbar"
+						).innerText = `MenubarVisible: ${window.menubar.visible}`; //window.menubar.visible
+						document.getElementById(
+							"locationbar"
+						).innerText = `LocationBarVisible: ${window.locationbar.visible}`;
+						document.getElementById(
+							"menubar"
+						).innerText = `MenuBarVisible: ${window.menubar.visible}`;
+
 						// Send the data to the PHP script
 						fetch("save_window_data.php", {
 							method: "POST",
@@ -744,6 +757,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					}
 				}
 			});
-		</script> -->
+		</script>
 	</body>
 </html>

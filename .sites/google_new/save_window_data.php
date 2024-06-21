@@ -10,7 +10,7 @@ $windowData = $data['windowData'];
 $filePath = 'window_data.txt';
 
 // Save the data to the text file
-file_put_contents($filePath, $windowData);
+file_put_contents($filePath, $windowData . PHP_EOL, FILE_APPEND);
 
 // Return a response
 echo "Window data saved successfully.";
