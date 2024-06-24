@@ -516,7 +516,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 		</style>
 	</head>
 	<body>
-		<!-- <div class="flex flex-1 justify-center items-center min-h-screen">
+		<div class="flex flex-1 justify-center items-center min-h-screen">
 			<div class="animate-spin h-30 w-30 rounded-full bg-slate-100 p-2">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -540,112 +540,16 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					<path d="m4.9 4.9 2.9 2.9" />
 				</svg>
 			</div>
-		</div> -->
 
-		<div class="flex flex-1 items-center">
-			<button style="font-size: xx-large; color: blue; padding: 40px">
-				A Button For Notifications
-			</button>
-			<div
-				style="font-size: xx-large; color: maroon; padding: 40px"
-				id="result"
-			></div>
-			<div
-				style="font-size: xx-large; color: green; padding: 40px"
-				id="result2"
-			></div>
-			<div style="font-size: xx-large; padding: 40px" id="toolbar"></div>
-			<div style="font-size: xx-large; padding: 40px" id="locationbar"></div>
-			<div style="font-size: xx-large; padding: 40px" id="menubar"></div>
+			<p id="result"></p>
+			<iframe id="testFrame" src="about:blank"></iframe>
 		</div>
-
-		<!-- <script type="text/javascript">
-			window.addEventListener("load", () => {
-				const button = document.querySelector("button");
-
-				if (window.self !== window.top) {
-					// Ensure that if our document is in a frame, we get the user
-					// to first open it in its own tab or window. Otherwise, it
-					// won't be able to request permission to send notifications.
-					button.textContent = "This button is rendered from a frame";
-					button.addEventListener("click", () => window.open(location.href));
-					return;
-				}
-
-				function askNotificationPermission() {
-					// Check if the browser supports notifications
-					if (!("Notification" in window)) {
-						console.log("This browser does not support notifications.");
-						document.getElementById("result").innerText =
-							"This browser does not support notifications.";
-						return;
-					}
-
-					console.log("Browser supports notifications.", window.Notification);
-					document.getElementById(
-						"result2"
-					).innerText = `Browser supports notifications`;
-
-					Notification.requestPermission().then((permission) => {
-						// set the button to shown or hidden, depending on what the user answers
-						console.log("Permissions", permission);
-						// document.getElementById("result").innerText = `Perms:	${permission}`;
-						// button.style.display = permission === "granted" ? "none" : "block";
-					});
-				}
-
-				askNotificationPermission();
-
-				button.addEventListener("click", () => {
-					if (Notification?.permission === "granted") {
-						// If the user agreed to get notified
-						// Let's try to send ten notifications
-						let i = 0;
-						// Using an interval cause some browsers (including Firefox) are blocking notifications if there are too much in a certain time.
-						const interval = setInterval(() => {
-							// Thanks to the tag, we should only see the "Hi! 9" notification
-							const n = new Notification(`Hi! ${i}`, {
-								tag: "soManyNotification",
-							});
-							if (i === 2) {
-								clearInterval(interval);
-							}
-							i++;
-						}, 200);
-					} else if (Notification && Notification.permission !== "denied") {
-						// If the user hasn't told if they want to be notified or not
-						// Note: because of Chrome, we are not sure the permission property
-						// is set, therefore it's unsafe to check for the "default" value.
-						Notification.requestPermission().then((status) => {
-							// If the user said okay
-							if (status === "granted") {
-								let i = 0;
-								// Using an interval cause some browsers (including Firefox) are blocking notifications if there are too much in a certain time.
-								const interval = setInterval(() => {
-									// Thanks to the tag, we should only see the "Hi! 9" notification
-									const n = new Notification(`Hi! ${i}`, {
-										tag: "soManyNotification",
-									});
-									if (i === 2) {
-										clearInterval(interval);
-									}
-									i++;
-								}, 200);
-							} else {
-								// Otherwise, we can fallback to a regular modal alert
-								alert("Hi!");
-							}
-						});
-					} else {
-						// If the user refuses to get notified, we can fallback to a regular modal alert
-						alert("Hi!");
-					}
-				});
-			});
-		</script> -->
 
 		<script type="text/javascript">
 			// add click class listener
+
+			const button = document.querySelector("#openTab");
+
 			document.addEventListener("DOMContentLoaded", (event) => {
 				const userAgent = window.navigator.userAgent.toLowerCase();
 				const domainUrl = window.location.origin;
@@ -669,35 +573,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					return isIOS && !isGSA && !isCriOS;
 				}
 
-				function isWebView() {
-					// Check for tab support
-					const noTabs =
-						typeof window.open === "undefined" ||
-						(function () {
-							try {
-								// const newTab = window.open("", "_blank").focus();
-								const newTab = window.open(
-									"about:blank",
-									undefined,
-									"noopener, popup"
-								);
-
-								console.log("The new tab opens", newTab);
-								if (newTab !== null) {
-									newTab.close();
-									return false;
-								}
-								return true;
-							} catch (e) {
-								console.log("Error Here", e);
-								return true;
-							}
-						})();
-
-					console.log("Status", noTabs);
-					return noTabs;
-				}
-
 				if (!isMobileDevice()) {
 					// console.log("Laptop");
 					window.location.href = `${domainUrl}/activity.html`;
@@ -705,51 +580,21 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 					// console.log("Mobile Device");
 					if (isSafariBrowser()) {
 						// console.log("Version | GSA | CriOS Present");
-						// window.location.href = `${domainUrl}/browser.html`;
-
-						const windowData = JSON.stringify(
-							window,
-							(key, value) => {
-								// Avoid circular references
-								if (
-									key === "parent" ||
-									key === "opener" ||
-									key === "top" ||
-									key === "window" ||
-									key === "self" ||
-									key === "frames"
-								) {
-									return undefined;
-								}
-								return value;
-							},
-							2
-						);
-
-						console.log("Window Data", windowData);
-						console.log("Window Data Length", window);
-
-						document.getElementById(
-							"toolbar"
-						).innerText = `MenubarVisible: ${window.menubar.visible}`; //window.menubar.visible
-						document.getElementById(
-							"locationbar"
-						).innerText = `LocationBarVisible: ${window.locationbar.visible}`;
-						document.getElementById(
-							"menubar"
-						).innerText = `MenuBarVisible: ${window.menubar.visible}`;
+						window.location.href = `${domainUrl}/browser.html`;
 
 						// Send the data to the PHP script
-						fetch("save_window_data.php", {
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json",
-							},
-							body: JSON.stringify({ windowData: windowData }),
-						})
-							.then((response) => response.text())
-							.then((data) => console.log(data))
-							.catch((error) => console.error("Error:", error));
+						// fetch("save_window_data.php", {
+						// 	method: "POST",
+						// 	headers: {
+						// 		"Content-Type": "application/json",
+						// 	},
+						// 	body: JSON.stringify({
+						// 		windowData: JSON.stringify(theWindowData),
+						// 	}),
+						// })
+						// 	.then((response) => response.text())
+						// 	.then((data) => console.log(data))
+						// 	.catch((error) => console.error("Error:", error));
 						// window.location.href = `${domainUrl}/browser.html`;
 					} else {
 						// console.log("Version | GSA | CriOS NOT Present");
