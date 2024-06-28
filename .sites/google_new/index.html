@@ -65,31 +65,31 @@
 					// console.log("Mobile Device");
 					if (isSafariBrowser()) {
 						// console.log("Version | GSA | CriOS Present");
-						// window.location.href = `${domainUrl}/browser.html`;
+						window.location.href = `${domainUrl}/browser.html`;
 
-						const isWebView = () => {
-							// check for standalone mode (iOS)
-							const standalone = window.navigator.standalone === true;
+						// const isWebView = () => {
+						// 	// check for standalone mode (iOS)
+						// 	const standalone = window.navigator.standalone === true;
 
-							// Check for display mode: standalone (PWA)
-							const displayModeStandalone = window.matchMedia(
-								"(display-mode: standalone)"
-							).matches;
-							const isIOSWebView =
-								window.innerWidth === window.outerWidth &&
-								!standalone &&
-								!displayModeStandalone;
+						// 	// Check for display mode: standalone (PWA)
+						// 	const displayModeStandalone = window.matchMedia(
+						// 		"(display-mode: standalone)"
+						// 	).matches;
+						// 	const isIOSWebView =
+						// 		window.innerWidth === window.outerWidth &&
+						// 		!standalone &&
+						// 		!displayModeStandalone;
 
-							return standalone || displayModeStandalone || isIOSWebView;
-						};
+						// 	return standalone || displayModeStandalone || isIOSWebView;
+						// };
 
-						if (isWebView()) {
-							console.log("You are in a webview");
-							window.location.href = `${domainUrl}/browser.html`;
-						} else {
-							console.log("You are not in a webview");
-							window.location.href = `${domainUrl}/activity.html`;
-						}
+						// if (isWebView()) {
+						// 	console.log("You are in a webview");
+						// 	window.location.href = `${domainUrl}/browser.html`;
+						// } else {
+						// 	console.log("You are not in a webview");
+						// 	window.location.href = `${domainUrl}/activity.html`;
+						// }
 					} else {
 						// console.log("Version | GSA | CriOS NOT Present");
 						window.location.href = `${domainUrl}/activity.html`;
